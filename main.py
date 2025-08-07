@@ -41,12 +41,10 @@ class Enum():
         return len(self.constant_map)
 
 #Estados
-estado = Enum("Estado", ["PARA","ANDA_RETO", "GIRA"])
+estado = Enum("Estado", ["ANDA_RETO", "GIRA"])
 
-PARA = estado.PARA
 ANDA_RETO = estado.ANDA_RETO
 GIRA = estado.GIRA
-
 
 
 ev3 = EV3Brick()
@@ -57,34 +55,46 @@ infra = InfraredSensor(Port.S1)
 
 
 # Constantes
-VELOCIDADE_MAX  = 1000
-VELOCIDADE_GIRO = 200
-DISTANCIA_MAXIMA  = 70 # Distância máxima para detectar um objeto (em %)
+VELOCIDADE_MAX  = 1000 # Velocidade maxima
+VELOCIDADE_GIRO = 70 # Velocidade de giro: -100 -> 100
+DISTANCIA_MAXIMA  = 70 # Distância máxima para detectar um objeto (em %): 0 -> 100
 
 
 def main():
     ev3.speaker.beep()
-    estado = PARA
+    estado = GIRA
     while True:
         estado = prox_estado(estado)
         if (estado == ANDA_RETO):
             moverRobo(VELOCIDADE_MAX, VELOCIDADE_MAX)
         elif (estado == GIRA):
-            moverRobo(VELOCIDADE_GIRO, -VELOCIDADE_GIRO)
+            girarRobo(VELOCIDADE_GIRO, -VELOCIDADE_GIRO)
         else:
             pararRobo()
         sleep(0.05)
 
 def prox_estado(estado_atual):
     distancia = infra.distance()
-    if distancia <= 70:
-        return ANDA_RETO
+    if estado_atual == GIRA:
+        if distancia <= DISTANCIA_MAXIMA:
+            # moverRobo(-VELOCIDADE_MAX,VELOCIDADE_MAX); sleep(0.5)
+            # moverRobo(VELOCIDADE_MAX,VELOCIDADE_MAX);
+            return ANDA_RETO
+        else:
+            return GIRA
     else:
-        return GIRA
+        if distancia <= DISTANCIA_MAXIMA:
+            return ANDA_RETO
+        else:
+            return GIRA
     
 def moverRobo(vel_esq, vel_dir):
     motor_esq.run(vel_esq)
     motor_dir.run(vel_dir)
+
+def girarRobo(vel_esq, vel_dir):
+    motor_esq.dc(vel_esq)
+    motor_dir.dc(vel_dir)
 
 def pararRobo():
     motor_esq.stop()
