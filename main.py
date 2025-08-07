@@ -24,7 +24,7 @@ DISTANCIA_COMBATE = 125 # Distância mínima para detectar um objeto (em mm) e l
 
 def main():
     ev3.speaker.beep()
-    estado = PARA
+    estado = GIRA_DIR
     while True:
         estado = prox_estado(estado)
         
@@ -50,7 +50,7 @@ def prox_estado(estado_atual):
         print("DIR")
         estado = GIRA_DIR
     else:
-        estado = estado_atual
+      estado = estado_atual
 
     return estado
 
