@@ -51,50 +51,43 @@ ev3 = EV3Brick()
 
 motor_esq = Motor(Port.A, Direction.COUNTERCLOCKWISE)
 motor_dir = Motor(Port.B, Direction.COUNTERCLOCKWISE)
-infra = InfraredSensor(Port.S1)
+infra = InfraredSensor(Port.S2)
 
 
 # Constantes
-VELOCIDADE_MAX  = 1000 # Velocidade maxima
-VELOCIDADE_GIRO = 70 # Velocidade de giro: -100 -> 100
-DISTANCIA_MAXIMA  = 70 # Distância máxima para detectar um objeto (em %): 0 -> 100
+VELOCIDADE_MAX  = 100 # 100Velocidade maxima
+VELOCIDADE_GIRO = 45
+DISTANCIA_MAXIMA  = 80 # Distância máxima para detectar um objeto (em %): 0 -> 100
 
 
 def main():
-    ev3.speaker.beep()
+#    ev3.speaker.beep()
     estado = GIRA
     while True:
         estado = prox_estado(estado)
         if (estado == ANDA_RETO):
-            moverRobo(VELOCIDADE_MAX, VELOCIDADE_MAX)
+            moverRoboDc(VELOCIDADE_MAX, VELOCIDADE_MAX)
         elif (estado == GIRA):
-            girarRobo(VELOCIDADE_GIRO, -VELOCIDADE_GIRO)
+            moverRoboDc(VELOCIDADE_GIRO, -VELOCIDADE_GIRO)
         else:
             pararRobo()
         sleep(0.05)
 
 def prox_estado(estado_atual):
     distancia = infra.distance()
-    if estado_atual == GIRA:
-        if distancia <= DISTANCIA_MAXIMA:
-            # moverRobo(-VELOCIDADE_MAX,VELOCIDADE_MAX); sleep(0.5)
-            # moverRobo(VELOCIDADE_MAX,VELOCIDADE_MAX);
-            return ANDA_RETO
-        else:
-            return GIRA
+    if distancia <= DISTANCIA_MAXIMA:
+        ev3.speaker.beep()
+        return ANDA_RETO
     else:
-        if distancia <= DISTANCIA_MAXIMA:
-            return ANDA_RETO
-        else:
-            return GIRA
-    
+        return GIRA
+
+def moverRoboDc(vel_esq, vel_dir):
+    motor_esq.dc(vel_esq)
+    motor_dir.dc(vel_dir)
+
 def moverRobo(vel_esq, vel_dir):
     motor_esq.run(vel_esq)
     motor_dir.run(vel_dir)
-
-def girarRobo(vel_esq, vel_dir):
-    motor_esq.dc(vel_esq)
-    motor_dir.dc(vel_dir)
 
 def pararRobo():
     motor_esq.stop()
